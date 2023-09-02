@@ -65,7 +65,7 @@ STDMETHODIMP STBL::QueryInterface(REFIID riid, void **ppv)
 {
     AssertThis(0);
 
-    if (IsEqualIID(riid, IID_IUnknown) || IsEqualIID(riid, IID_IStream))
+    if (IsEqualIID(riid, __uuidof(IUnknown)) || IsEqualIID(riid, __uuidof(IStream)))
     {
         *ppv = (void *)this;
         AddRef();
@@ -385,7 +385,7 @@ STDMETHODIMP AMNOT::QueryInterface(REFIID riid, void **ppv)
 {
     AssertThis(0);
 
-    if (IsEqualIID(riid, IID_IUnknown) || IsEqualIID(riid, IID_IAMNotifySink))
+    if (IsEqualIID(riid, __uuidof(IUnknown)) || IsEqualIID(riid, IID_IAMNotifySink))
     {
         *ppv = (void *)this;
         AddRef();
