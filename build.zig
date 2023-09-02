@@ -43,6 +43,7 @@ const kauai_cflags: []const []const u8 = &.{
 };
 
 const kauai_sources: []const []const u8 = &.{
+    "kauai/src/no-libcpp.cpp",
     "kauai/src/appb.cpp",
     "kauai/src/base.cpp",
     "kauai/src/chcm.cpp",

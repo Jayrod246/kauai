@@ -11,8 +11,6 @@
 ***************************************************************************/
 #include "frame.h"
 
-#include <climits>
-
 ASSERTNAME
 
 RTCLASS(MIDP)

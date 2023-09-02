@@ -10,7 +10,6 @@
     Windows base application class.
 
 ***************************************************************************/
-#include <iostream>
 #include "frame.h"
 #include "fcntl.h"
 #include "stdio.h"
@@ -30,31 +29,8 @@ int WINAPI WinMain(HINSTANCE hinst, HINSTANCE hinstPrev, LPSTR pszs, int wShow)
     vwig.pszCmdLine = GetCommandLine();
     vwig.wShow = wShow;
     vwig.lwThreadMain = LwThreadCur();
-#ifdef DEBUG
-    APPB::CreateConsole();
-#endif
     FrameMain();
     return 0;
-}
-
-/*
- * Create debug console window and wire up std streams
- */
-void APPB::CreateConsole()
-{
-    if (!AllocConsole())
-    {
-        return;
-    }
-
-    FILE *fDummy;
-    freopen_s(&fDummy, "CONOUT$", "w", stdout);
-    freopen_s(&fDummy, "CONOUT$", "w", stderr);
-    freopen_s(&fDummy, "CONIN$", "r", stdin);
-    std::cout.clear();
-    std::clog.clear();
-    std::cerr.clear();
-    std::cin.clear();
 }
 
 /***************************************************************************

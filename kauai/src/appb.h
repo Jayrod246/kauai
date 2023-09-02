@@ -211,8 +211,6 @@ class APPB : public APPB_PAR
     // setting up the heap
     static void _SetupHeap(long cbExtraStack, long cactMoreMasters);
     virtual void SetupHeap(void);
-#elif defined(WIN)
-    static void CreateConsole();
 #endif
 
     bool FQuitting(void)
@@ -327,7 +325,7 @@ extern PCEX vpcex;
 extern PSNDM vpsndm;
 
 // main entry point for the client app
-void FrameMain(void);
+extern "C" void FrameMain(void);
 
 // alert button kinds
 enum
