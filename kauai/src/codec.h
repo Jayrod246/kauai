@@ -106,9 +106,7 @@ class KCDC : public KCDC_PAR
 
   protected:
     bool _FEncode(void *pvSrc, long cbSrc, void *pvDst, long cbDst, long *pcbDst);
-    bool _FDecode(void *pvSrc, long cbSrc, void *pvDst, long cbDst, long *pcbDst);
     bool _FEncode2(void *pvSrc, long cbSrc, void *pvDst, long cbDst, long *pcbDst);
-    bool _FDecode2(void *pvSrc, long cbSrc, void *pvDst, long cbDst, long *pcbDst);
 
   public:
     virtual bool FCanDo(bool fEncode, long cfmt)

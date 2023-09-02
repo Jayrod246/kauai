@@ -107,6 +107,7 @@
 ***************************************************************************/
 #include "util.h"
 #include "codkpri.h"
+#include "kauai-glue.h"
 ASSERTNAME
 
 // REVIEW shonk: should we turn on _Safety?
@@ -134,12 +135,12 @@ bool KCDC::FConvert(bool fEncode, long cfmt, void *pvSrc, long cbSrc, void *pvDs
     case kcfmtKauai2:
         if (fEncode)
             return _FEncode2(pvSrc, cbSrc, pvDst, cbDst, pcbDst);
-        return _FDecode2(pvSrc, cbSrc, pvDst, cbDst, pcbDst);
+        return ZigDecompress2(pvSrc, cbSrc, pvDst, cbDst, pcbDst);
 
     case kcfmtKauai:
         if (fEncode)
             return _FEncode(pvSrc, cbSrc, pvDst, cbDst, pcbDst);
-        return _FDecode(pvSrc, cbSrc, pvDst, cbDst, pcbDst);
+        return ZigDecompress(pvSrc, cbSrc, pvDst, cbDst, pcbDst);
     }
 }
 
@@ -425,150 +426,6 @@ LFail:
 }
 
 /***************************************************************************
-    Decompress a compressed KCDC stream.
-***************************************************************************/
-bool KCDC::_FDecode(void *pvSrc, long cbSrc, void *pvDst, long cbDst, long *pcbDst)
-{
-    AssertThis(0);
-    AssertIn(cbSrc, 1, kcbMax);
-    AssertPvCb(pvSrc, cbSrc);
-    AssertIn(cbDst, 1, kcbMax);
-    AssertPvCb(pvDst, cbDst);
-    AssertVarMem(pcbDst);
-
-    long ib;
-    byte bFlags;
-
-    TrashVar(pcbDst);
-    if (cbSrc <= kcbTailKcdc + 1)
-    {
-        Bug("bad source stream");
-        return fFalse;
-    }
-
-    // verify that the last kcbTailKcdc bytes are FF.  This guarantees that
-    // we won't run past the end of the source.
-    for (ib = 0; ib++ < kcbTailKcdc;)
-    {
-        if (((byte *)pvSrc)[cbSrc - ib] != 0xFF)
-        {
-            Bug("bad tail of compressed data");
-            return fFalse;
-        }
-    }
-
-    bFlags = ((byte *)pvSrc)[0];
-    if (bFlags != 0)
-    {
-        Bug("unknown flag byte");
-        return fFalse;
-    }
-
-#ifdef IN_80386
-
-#include "kcdc_386.h"
-
-    *pcbDst = cbTot;
-    return fTrue;
-
-#else //! IN_80386
-
-    long cb, dib, ibit, cbit;
-    register ulong luCur;
-    byte *pbT;
-    register byte *pbDst = (byte *)pvDst;
-    byte *pbLimDst = (byte *)pvDst + cbDst;
-    register byte *pbSrc = (byte *)pvSrc + 1;
-
-#define _FTest(ibit) (luCur & (1L << (ibit)))
-#ifdef LITTLE_ENDIAN
-#define _Advance(cb) ((pbSrc += (cb)), (luCur = *(ulong *)(pbSrc - 4)))
-#else //! LITTLE_ENDIAN
-#define _Advance(cb) ((pbSrc += (cb)), (luCur = LwFromBytes(pbSrc[-1], pbSrc[-2], pbSrc[-3], pbSrc[-4])))
-#endif //! LITTLE_ENDIAN
-
-    _Advance(4);
-
-    for (ibit = 0;;)
-    {
-        if (!_FTest(ibit))
-        {
-            // literal
-#ifdef SAFETY
-            if (pbDst >= pbLimDst)
-                goto LFail;
-#endif // SAFETY
-            *pbDst++ = (byte)(luCur >> ibit + 1);
-            ibit += 9;
-        }
-        else
-        {
-            // get the offset
-            cb = 1;
-            if (!_FTest(ibit + 1))
-            {
-                dib = ((luCur >> (ibit + 2)) & ((1 << kcbitKcdc0) - 1)) + kdibMinKcdc0;
-                ibit += 2 + kcbitKcdc0;
-            }
-            else if (!_FTest(ibit + 2))
-            {
-                dib = ((luCur >> (ibit + 3)) & ((1 << kcbitKcdc1) - 1)) + kdibMinKcdc1;
-                ibit += 3 + kcbitKcdc1;
-            }
-            else if (!_FTest(ibit + 3))
-            {
-                dib = ((luCur >> (ibit + 4)) & ((1 << kcbitKcdc2) - 1)) + kdibMinKcdc2;
-                ibit += 4 + kcbitKcdc2;
-            }
-            else
-            {
-                dib = (luCur >> (ibit + 4)) & ((1 << kcbitKcdc3) - 1);
-                if (dib == ((1 << kcbitKcdc3) - 1))
-                    break;
-                dib += kdibMinKcdc3;
-                ibit += 4 + kcbitKcdc3;
-                cb++;
-            }
-            _Advance(ibit >> 3);
-            ibit &= 0x07;
-
-            // get the length
-            for (cbit = 0;;)
-            {
-                if (!_FTest(ibit + cbit))
-                    break;
-                if (++cbit > kcbitMaxLenKcdc)
-                    goto LFail;
-            }
-
-            cb += (1 << cbit) + ((luCur >> (cbit + 1)) & ((1 << cbit) - 1));
-            ibit += cbit + cbit + 1;
-
-#ifdef SAFETY
-            if (pbLimDst - pbDst < cb || pbDst - (byte *)pvDst < dib)
-                goto LFail;
-#endif // SAFETY
-            for (pbT = pbDst - dib; cb-- > 0;)
-                *pbDst++ = *pbT++;
-        }
-        _Advance(ibit >> 3);
-        ibit &= 0x07;
-    }
-
-    *pcbDst = pbDst - (byte *)pvDst;
-    return fTrue;
-
-#undef _FTest
-#undef _Advance
-
-#endif //! IN_80386
-
-LFail:
-    Bug("bad compressed data");
-    return fFalse;
-}
-
-/***************************************************************************
     Compress the data in pvSrc using the KCD2 encoding.  Returns false if
     the data can't be compressed. This is not optimized (ie, it's slow).
 ***************************************************************************/
@@ -783,162 +640,5 @@ bool KCDC::_FEncode2(void *pvSrc, long cbSrc, void *pvDst, long cbDst, long *pcb
 LFail:
     // can't compress the source
     FreePpv((void **)&pmpibibNext);
-    return fFalse;
-}
-
-/***************************************************************************
-    Decompress a compressed KCD2 stream.
-***************************************************************************/
-bool KCDC::_FDecode2(void *pvSrc, long cbSrc, void *pvDst, long cbDst, long *pcbDst)
-{
-    AssertThis(0);
-    AssertIn(cbSrc, 1, kcbMax);
-    AssertPvCb(pvSrc, cbSrc);
-    AssertIn(cbDst, 1, kcbMax);
-    AssertPvCb(pvDst, cbDst);
-    AssertVarMem(pcbDst);
-
-    long ib;
-    byte bFlags;
-
-    TrashVar(pcbDst);
-    if (cbSrc <= kcbTailKcd2 + 1)
-    {
-        Bug("bad source stream");
-        return fFalse;
-    }
-
-    // verify that the last kcbTailKcd2 bytes are FF.  This guarantees that
-    // we won't run past the end of the source.
-    for (ib = 0; ib++ < kcbTailKcd2;)
-    {
-        if (((byte *)pvSrc)[cbSrc - ib] != 0xFF)
-        {
-            Bug("bad tail of compressed data");
-            return fFalse;
-        }
-    }
-
-    bFlags = ((byte *)pvSrc)[0];
-    if (bFlags != 0)
-    {
-        Bug("unknown flag byte");
-        return fFalse;
-    }
-
-#ifdef IN_80386
-
-#include "kcd2_386.h"
-
-    *pcbDst = cbTot;
-    return fTrue;
-
-#else //! IN_80386
-
-    long cb, dib, ibit, cbit;
-    register ulong luCur;
-    byte bT;
-    byte *pbT;
-    register byte *pbDst = (byte *)pvDst;
-    byte *pbLimDst = (byte *)pvDst + cbDst;
-    register byte *pbSrc = (byte *)pvSrc + 1;
-    byte *pbLimSrc = (byte *)pvSrc + cbSrc - kcbTailKcd2;
-
-#define _FTest(ibit) (luCur & (1L << (ibit)))
-#ifdef LITTLE_ENDIAN
-#define _Advance(cb) ((pbSrc += (cb)), (luCur = *(ulong *)(pbSrc - 4)))
-#else //! LITTLE_ENDIAN
-#define _Advance(cb) ((pbSrc += (cb)), (luCur = LwFromBytes(pbSrc[-1], pbSrc[-2], pbSrc[-3], pbSrc[-4])))
-#endif //! LITTLE_ENDIAN
-
-    _Advance(4);
-
-    for (ibit = 0;;)
-    {
-        // get the length
-        for (cbit = 0;;)
-        {
-            if (!_FTest(ibit + cbit))
-                break;
-            if (++cbit > kcbitMaxLenKcd2)
-                goto LDone;
-        }
-
-        cb = (1 << cbit) + ((luCur >> (cbit + 1)) & ((1 << cbit) - 1));
-        ibit += cbit + cbit + 1;
-        _Advance(ibit >> 3);
-        ibit &= 0x07;
-
-        if (!_FTest(ibit))
-        {
-            // literal
-#ifdef SAFETY
-            if (pbDst + cb > pbLimDst)
-                goto LFail;
-            if (pbSrc - 3 + cb > pbLimSrc)
-                goto LFail;
-#endif // SAFETY
-            ibit++;
-            bT = (byte) ~(luCur & ((1 << ibit) - 1));
-            if (cb > 1)
-            {
-                CopyPb(pbSrc - 3, pbDst, cb - 1);
-                pbDst += cb - 1;
-                _Advance(cb);
-            }
-            else
-                _Advance(1);
-            bT |= luCur & ((1 << ibit) - 1);
-            *pbDst++ = bT;
-        }
-        else
-        {
-            // get the offset
-            cb++;
-            if (!_FTest(ibit + 1))
-            {
-                dib = ((luCur >> (ibit + 2)) & ((1 << kcbitKcd2_0) - 1)) + kdibMinKcd2_0;
-                ibit += 2 + kcbitKcd2_0;
-            }
-            else if (!_FTest(ibit + 2))
-            {
-                dib = ((luCur >> (ibit + 3)) & ((1 << kcbitKcd2_1) - 1)) + kdibMinKcd2_1;
-                ibit += 3 + kcbitKcd2_1;
-            }
-            else if (!_FTest(ibit + 3))
-            {
-                dib = ((luCur >> (ibit + 4)) & ((1 << kcbitKcd2_2) - 1)) + kdibMinKcd2_2;
-                ibit += 4 + kcbitKcd2_2;
-            }
-            else
-            {
-                dib = (luCur >> (ibit + 4)) & ((1 << kcbitKcd2_3) - 1) + kdibMinKcd2_3;
-                ibit += 4 + kcbitKcd2_3;
-                cb++;
-            }
-
-#ifdef SAFETY
-            if (pbLimDst - pbDst < cb || pbDst - (byte *)pvDst < dib)
-                goto LFail;
-#endif // SAFETY
-            for (pbT = pbDst - dib; cb-- > 0;)
-                *pbDst++ = *pbT++;
-        }
-
-        _Advance(ibit >> 3);
-        ibit &= 0x07;
-    }
-
-LDone:
-    *pcbDst = pbDst - (byte *)pvDst;
-    return fTrue;
-
-#undef _FTest
-#undef _Advance
-
-#endif //! IN_80386
-
-LFail:
-    Bug("bad compressed data");
     return fFalse;
 }

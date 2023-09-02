@@ -29,6 +29,9 @@ pub fn build(b: *std.build.Builder) void {
     lib.linkSystemLibrary("mpr");
     lib.linkSystemLibrary("comdlg32");
     lib.linkSystemLibrary("avifil32");
+
+    _ = b.addModule("kauai", .{ .source_file = .{ .path = "src/kauai.zig" } });
+
     b.installArtifact(lib);
 }
 
