@@ -1,8 +1,10 @@
 .{
     .name = "kauai",
     .version = "0.0.0",
-    .dependencies = .{ .audioman = .{
-        .url = "https://github.com/Jayrod246/audioman/archive/refs/heads/main.tar.gz",
-        .hash = "1220e6bf7aaed250636ac1fe4090b15ecc2618ef394032808325e9c818ea2b3541f0",
-    } },
+    .dependencies = .{
+        .audioman = .{
+            .url = "https://github.com/Jayrod246/audioman/archive/refs/heads/main.tar.gz",
+            .hash = "1220afc37301a7849bb5674814acef49483355ddbae55c41d0c18b7bdfca191b7610",
+        },
+    },
 }
