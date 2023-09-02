@@ -20,7 +20,7 @@ struct DLGI
     long iditFocus;
 };
 
-achar _szDlgProp[] = PszLit("DLG");
+achar _szDlgProp[] = StrLit("DLG");
 
 /***************************************************************************
     Read the dialog resource and construct the GGDIT.

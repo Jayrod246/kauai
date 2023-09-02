@@ -17,7 +17,7 @@ ASSERTNAME
 const long _klwMaxScroll = 20000; // should be less than 32K
 
 #ifdef WIN
-achar _szCtlProp[] = PszLit("CTL");
+achar _szCtlProp[] = StrLit("CTL");
 #endif // WIN
 
 RTCLASS(CTL)

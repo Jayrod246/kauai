@@ -17,7 +17,7 @@ ASSERTNAME
 RTCLASS(LEXB)
 
 // #line handling
-achar _szPoundLine[] = PszLit("#line");
+achar _szPoundLine[] = StrLit("#line");
 #define kcchPoundLine (CvFromRgv(_szPoundLine) - 1)
 
 ushort LEXB::_mpchgrfct[128] = {

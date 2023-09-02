@@ -113,16 +113,17 @@ typedef wchar achar;
 typedef unsigned short uchar;
 const achar kchMax = kwchMax;
 const achar kchMin = kwchMin;
-#define PszLit(sz) L##sz
+#define StrLit(s) L##s
 #define ChLit(ch) L##ch
 #else //! UNICODE
 typedef schar achar;
 typedef unsigned char uchar;
 const achar kchMax = kschMax;
 const achar kchMin = kschMin;
-#define PszLit(sz) sz
+#define StrLit(s) s
 #define ChLit(ch) ch
 #endif //! UNICODE
+#define PszLit(sz) const_cast<PSZ>((const PSZ) sz)
 
 typedef class GRPB *PGRPB;
 typedef class GLB *PGLB;

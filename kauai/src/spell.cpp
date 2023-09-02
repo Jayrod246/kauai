@@ -110,7 +110,7 @@ bool SPLC::_FEnsureDll(SC_LID sclid)
     STN stn;
     SZ sz;
 
-    stn.FFormatSz(PszLit("SOFTWARE\\Microsoft\\Shared Tools\\Proofing Tools") PszLit("\\Spelling\\%d\\Normal"), sclid);
+    stn.FFormatSz(PszLit(StrLit("SOFTWARE\\Microsoft\\Shared Tools\\Proofing Tools") StrLit("\\Spelling\\%d\\Normal")), sclid);
     if (ERROR_SUCCESS != RegOpenKeyEx(HKEY_LOCAL_MACHINE, stn.Psz(), 0, KEY_QUERY_VALUE, &hkey))
     {
         goto LError;
@@ -170,7 +170,7 @@ bool SPLC::_FEnsureMainDict(SC_LID sclid, PFNI pfni)
     STN stn;
     SZ sz;
 
-    stn.FFormatSz(PszLit("SOFTWARE\\Microsoft\\Shared Tools\\Proofing Tools") PszLit("\\Spelling\\%d\\Normal"), sclid);
+    stn.FFormatSz(PszLit(StrLit("SOFTWARE\\Microsoft\\Shared Tools\\Proofing Tools") StrLit("\\Spelling\\%d\\Normal")), sclid);
     if (ERROR_SUCCESS != RegOpenKeyEx(HKEY_LOCAL_MACHINE, stn.Psz(), 0, KEY_QUERY_VALUE, &hkey))
     {
         goto LError;

@@ -333,7 +333,7 @@ class STN
         _rgch[0] = _rgch[1] = 0;
         AssertThis(0);
     }
-    STN(STN &stnSrc);
+    STN(const STN &stnSrc);
     STN(PSZ pszSrc);
 
     // pointers to the data - these should be considered readonly!

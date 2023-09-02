@@ -15,16 +15,17 @@ ASSERTNAME
 
 #include "chtrans.h"
 
-const achar vrgchHex[] = PszLit("0123456789ABCDEF");
+const achar vrgchHex[] = StrLit("0123456789ABCDEF");
 
 /***************************************************************************
     Constructor for a string based on another string.
 ***************************************************************************/
-STN::STN(STN &stnSrc)
+STN::STN(const STN &stnSrc)
 {
-    AssertPo(&stnSrc, 0);
+    PSTN pstnSrc = const_cast<PSTN>(&stnSrc);
+    AssertPo(pstnSrc, 0);
 
-    CopyPb(stnSrc._rgch, _rgch, (stnSrc.Cch() + 2) * size(achar));
+    CopyPb(pstnSrc->_rgch, _rgch, (pstnSrc->Cch() + 2) * size(achar));
     AssertThis(0);
 }
 
