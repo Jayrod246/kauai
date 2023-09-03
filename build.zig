@@ -14,6 +14,7 @@ pub fn build(b: *std.build.Builder) void {
         .target = target,
         .optimize = optimize,
         .link_libc = true,
+        .root_source_file = .{ .path = "src/kauai-glue.zig" },
     });
     lib.disable_sanitize_c = true;
 
@@ -30,7 +31,8 @@ pub fn build(b: *std.build.Builder) void {
     lib.linkSystemLibrary("comdlg32");
     lib.linkSystemLibrary("avifil32");
 
-    _ = b.addModule("kauai", .{ .source_file = .{ .path = "src/kauai.zig" } });
+    const kauai_mod = b.addModule("kauai", .{ .source_file = .{ .path = "src/kauai.zig" } });
+    lib.addModule("kauai", kauai_mod);
 
     b.installArtifact(lib);
 }
