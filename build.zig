@@ -3,6 +3,7 @@ const std = @import("std");
 pub fn build(b: *std.build.Builder) void {
     const target = b.standardTargetOptions(.{});
     const optimize = b.standardOptimizeOption(.{});
+    const link_libcpp = b.option(bool, "libcpp", "Enable linking with libcpp. Default: false") orelse false;
 
     const audioman_dep = b.dependency("audioman", .{
         .target = target,
@@ -17,6 +18,11 @@ pub fn build(b: *std.build.Builder) void {
         .root_source_file = .{ .path = "src/kauai-glue.zig" },
     });
     lib.disable_sanitize_c = true;
+
+    if (link_libcpp) {
+        lib.defineCMacro("KAUAI_LINK_LIBCPP", null);
+        lib.linkLibCpp();
+    }
 
     lib.linkLibrary(audioman_dep.artifact("audioman"));
     lib.installLibraryHeaders(audioman_dep.artifact("audioman"));

@@ -1,3 +1,4 @@
+#ifndef KAUAI_LINK_LIBCPP
 #include <stdlib.h>
 
 extern "C" void __cxa_pure_virtual() { while (1); }
@@ -18,3 +19,4 @@ void operator delete[](void *p)
 {
       free(p);
 }
+#endif
