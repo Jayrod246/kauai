@@ -78,8 +78,8 @@ pub fn Decompress(comptime ReaderType: type) type {
                     else => unreachable,
                 };
 
-                count_ones = countOnes(&source, 11);
-                if (count_ones.limit_or_eof and count_ones.count < 11) {
+                count_ones = countOnes(&source, 12);
+                if (count_ones.limit_or_eof and count_ones.count < 12) {
                     return error.CorruptedData;
                 }
 
