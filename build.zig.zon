@@ -4,7 +4,14 @@
     .dependencies = .{
         .audioman = .{
             .url = "https://github.com/Jayrod246/audioman/archive/refs/heads/main.tar.gz",
-            .hash = "1220afc37301a7849bb5674814acef49483355ddbae55c41d0c18b7bdfca191b7610",
+            .hash = "122063c839fe7580c3d7dd79c22d9928b47734363cb73574b16b93755b420af2e926",
         },
+    },
+    .paths = .{
+        "README.md",
+        "build.zig",
+        "build.zig.zon",
+        "kauai",
+        "src",
     },
 }

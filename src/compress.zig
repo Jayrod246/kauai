@@ -9,7 +9,7 @@ pub const Codec = enum {
 pub fn Decompress(comptime ReaderType: type) type {
     return struct {
         const Self = @This();
-        const BitReader = io.BitReader(.Little, ReaderType);
+        const BitReader = io.BitReader(.little, ReaderType);
 
         pub const Error = ReaderType.Error ||
             error{CorruptedData};
@@ -41,7 +41,7 @@ pub fn Decompress(comptime ReaderType: type) type {
         }
 
         fn unpack1(r: ReaderType, output: []u8) !void {
-            var source = io.bitReader(.Little, r);
+            var source = io.bitReader(.little, r);
             var pos: usize = 0;
 
             outer_loop: while (true) {
@@ -91,7 +91,7 @@ pub fn Decompress(comptime ReaderType: type) type {
         }
 
         fn unpack2(r: ReaderType, output: []u8) !void {
-            var source = io.bitReader(.Little, r);
+            var source = io.bitReader(.little, r);
             var pos: usize = 0;
 
             while (true) {

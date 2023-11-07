@@ -29,7 +29,7 @@ pub fn build(b: *std.build.Builder) void {
 
     lib.addIncludePath(.{ .path = "kauai/src" });
     lib.installHeadersDirectory("kauai/src", "");
-    lib.addCSourceFiles(kauai_sources, kauai_cflags);
+    lib.addCSourceFiles(.{ .files = kauai_sources, .flags = kauai_cflags });
     lib.linkSystemLibrary("user32");
     lib.linkSystemLibrary("gdi32");
     lib.linkSystemLibrary("msvfw32");
