@@ -118,7 +118,7 @@ pub fn Decompress(comptime ReaderType: type) type {
                         } else {
                             // Not byte aligned, so calculate bit_offset
                             const remaining_bits = source.bit_count;
-                            var bit_offset = 8 - @as(usize, remaining_bits);
+                            const bit_offset = 8 - @as(usize, remaining_bits);
 
                             // and read a partial byte, enough to get us into alignment
                             var the_last_byte = try source.readBitsNoEof(u8, remaining_bits);

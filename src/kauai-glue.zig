@@ -18,7 +18,7 @@ inline fn decompress(comptime codec: k.compress.Codec, args: anytype) bool {
         inline fn f(pvSrc: *anyopaque, cbSrc: u32, pvDst: *anyopaque, cbDst: u32, pcbDst: ?*u32) bool {
             _ = pcbDst;
             var src = io.fixedBufferStream(@as([*]const u8, @ptrCast(pvSrc))[0..@intCast(cbSrc)]);
-            var dst = @as([*]u8, @ptrCast(pvDst))[0..@intCast(cbDst)];
+            const dst = @as([*]u8, @ptrCast(pvDst))[0..@intCast(cbDst)];
 
             src.reader().skipBytes(1, .{}) catch return false;
             k.compress.decompress(src.reader()).unpack(codec, dst) catch return false;
