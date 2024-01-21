@@ -1,6 +1,6 @@
 const std = @import("std");
 
-pub fn build(b: *std.build.Builder) void {
+pub fn build(b: *std.Build) void {
     const target = b.standardTargetOptions(.{});
     const optimize = b.standardOptimizeOption(.{});
     const link_libcpp = b.option(bool, "libcpp", "Enable linking with libcpp. Default: false") orelse false;
@@ -17,7 +17,7 @@ pub fn build(b: *std.build.Builder) void {
         .link_libc = true,
         .root_source_file = .{ .path = "src/kauai-glue.zig" },
     });
-    lib.disable_sanitize_c = true;
+    lib.root_module.sanitize_c = false;
 
     if (link_libcpp) {
         lib.defineCMacro("KAUAI_LINK_LIBCPP", null);
@@ -37,8 +37,11 @@ pub fn build(b: *std.build.Builder) void {
     lib.linkSystemLibrary("comdlg32");
     lib.linkSystemLibrary("avifil32");
 
-    const kauai_mod = b.addModule("kauai", .{ .source_file = .{ .path = "src/kauai.zig" } });
-    lib.addModule("kauai", kauai_mod);
+    const kauai_mod = b.addModule("kauai", .{
+        .root_source_file = .{ .path = "src/kauai.zig" },
+        .sanitize_c = false,
+    });
+    lib.root_module.addImport("kauai", kauai_mod);
 
     b.installArtifact(lib);
 }
