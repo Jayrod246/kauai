@@ -28,7 +28,7 @@ pub fn build(b: *std.Build) void {
     lib.installLibraryHeaders(audioman_dep.artifact("audioman"));
 
     lib.addIncludePath(.{ .path = "kauai/src" });
-    lib.installHeadersDirectory("kauai/src", "");
+    lib.installHeadersDirectory(.{ .path = "kauai/src" }, "", .{});
     lib.addCSourceFiles(.{ .files = kauai_sources, .flags = kauai_cflags });
     lib.linkSystemLibrary("user32");
     lib.linkSystemLibrary("gdi32");
