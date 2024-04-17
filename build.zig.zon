@@ -3,8 +3,8 @@
     .version = "0.0.0",
     .dependencies = .{
         .audioman = .{
-            .url = "https://github.com/Jayrod246/audioman/archive/944de6a95bad0b0e80237da2af89f11915ce8cc3.tar.gz",
-            .hash = "12209474d119fdff2ac703f4091ce2b69d99fcd09ca65991354ae8b3bd39181d93c6",
+            .url = "https://github.com/jayrod246/audioman/archive/2c82ad5c71d66ba098876ef2836983dc8fe5125b.tar.gz",
+            .hash = "1220c138db1c17352132eb3b7cd3119ed3837a2424484bfd317e077dd02154be5b7a",
         },
     },
     .paths = .{

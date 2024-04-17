@@ -15,7 +15,7 @@ pub fn build(b: *std.Build) void {
         .target = target,
         .optimize = optimize,
         .link_libc = true,
-        .root_source_file = .{ .path = "src/kauai-glue.zig" },
+        .root_source_file = b.path("src/kauai-glue.zig"),
     });
     lib.root_module.sanitize_c = false;
 
@@ -27,8 +27,8 @@ pub fn build(b: *std.Build) void {
     lib.linkLibrary(audioman_dep.artifact("audioman"));
     lib.installLibraryHeaders(audioman_dep.artifact("audioman"));
 
-    lib.addIncludePath(.{ .path = "kauai/src" });
-    lib.installHeadersDirectory(.{ .path = "kauai/src" }, "", .{});
+    lib.addIncludePath(b.path("kauai/src"));
+    lib.installHeadersDirectory(b.path("kauai/src"), "", .{});
     lib.addCSourceFiles(.{ .files = kauai_sources, .flags = kauai_cflags });
     lib.linkSystemLibrary("user32");
     lib.linkSystemLibrary("gdi32");
@@ -38,7 +38,7 @@ pub fn build(b: *std.Build) void {
     lib.linkSystemLibrary("avifil32");
 
     const kauai_mod = b.addModule("kauai", .{
-        .root_source_file = .{ .path = "src/kauai.zig" },
+        .root_source_file = b.path("src/kauai.zig"),
         .sanitize_c = false,
     });
     lib.root_module.addImport("kauai", kauai_mod);
